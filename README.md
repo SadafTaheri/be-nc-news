@@ -1,9 +1,15 @@
-# Northcoders News API
+# News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+This project is an API for accessing application data programmatically, mimicking a real-world backend service like Reddit. The database used is PostgreSQL.
 
+## Getting Started
 
+### Prerequisites
 
---- 
+- Node.js
+- PostgreSQL
 
-This portfolio project was created as part of a Digital Skills Bootcamp in Software Engineering provided by [Northcoders](https://northcoders.com/)
+### Installation
+
+Clone the repository:
+git clone https://github.com/SadafTaheri/be-nc-news.git
