@@ -1,10 +1,20 @@
-const { response } = require("../app");
-const { selectArticleById } = require("../models/articles-models");
-exports.getArticleById = (request, response, next) => {
-  const { article_id } = request.params;
+const {
+  selectArticleById,
+  fetchArticles,
+} = require("../models/articles-models");
+exports.getArticleById = (req, res, next) => {
+  const { article_id } = req.params;
   selectArticleById(article_id)
     .then((article) => {
-      response.status(200).send({ article });
+      res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.getAllArticles = (req, res, next) => {
+  fetchArticles()
+    .then((articles) => {
+      res.status(200).send({ articles });
     })
     .catch(next);
 };
