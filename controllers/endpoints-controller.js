@@ -1,3 +1,5 @@
-const { response } = require("../app");
+const endpoints = require("../endpoints.json");
 
-exports.endpointControl = () => {};
+exports.getEndpoints = (req, res, next) => {
+  res.status(200).send({ endpoints });
+};

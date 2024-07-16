@@ -2,13 +2,17 @@ const express = require("express");
 
 const app = express();
 const { getAllTopics } = require("./controllers/topics-controller");
-const { getArticleById } = require("./controllers/articles.constroller");
-const endpoints = require("./endpoints.json");
+const {
+  getArticleById,
+  getAllArticles,
+} = require("./controllers/articles.constroller");
+const { getEndpoints } = require("./controllers/endpoints-controller");
 
-app.get("/api", (request, response, next) => {
-  response.status(200).send({ endpoints });
-}); // It should move to controller and remove from here
+app.get("/api", getEndpoints);
+
 app.get("/api/topics", getAllTopics);
+
+app.get("/api/articles", getAllArticles);
 
 app.get("/api/articles/:article_id", getArticleById);
 
