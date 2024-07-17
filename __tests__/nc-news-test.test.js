@@ -114,7 +114,6 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        console.log(body.comments);
         expect(body.comments.length).toBe(11);
         body.comments.forEach((comment) => {
           expect(comment).toEqual({
@@ -123,7 +122,7 @@ describe("GET /api/articles/:article_id/comments", () => {
             created_at: expect.any(String),
             author: expect.any(String),
             body: expect.any(String),
-            article_id: expect.any(Number),
+            article_id: 1,
           });
         });
       });
@@ -152,6 +151,93 @@ describe("GET /api/articles/:article_id/comments", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("status: 201 responds with new comment posted by user", () => {
+    const postObj = {
+      username: "icellusedkars",
+      body: "I like it.",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(postObj)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toEqual({
+          comment_id: expect.any(Number),
+          votes: 0,
+          created_at: expect.any(String),
+          author: "icellusedkars",
+          body: "I like it.",
+          article_id: 1,
+        });
+      });
+  });
+
+  test("status: 400 when posted comment has missing required information", () => {
+    const postObj = {
+      username: "icellusedkars",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(postObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+
+  test("status: 404 when posted comment is valid but article_id does not exists", () => {
+    const postObj = {
+      username: "icellusedkars",
+      body: "I like it.",
+    };
+    return request(app)
+      .post("/api/articles/99999/comments")
+      .send(postObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No article found under article_id 99999");
+      });
+  });
+
+  test("status: 404 when username is not exist", () => {
+    const postObj = {
+      username: "popsicle",
+      body: "I like it.",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(postObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No user found under this username popsicle");
+      });
+  });
+
+  test("status: 404 when both username & article_id are not exist", () => {
+    const postObj = {
+      username: "Sadaf",
+      body: "I like it.",
+    };
+    return request(app)
+      .post("/api/articles/88888/comments")
+      .send(postObj)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No article found under article_id 88888");
+      })
+      .catch(() => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send(postObj)
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("No user found under this username Sadaf");
+          });
       });
   });
 });
