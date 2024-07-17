@@ -204,7 +204,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 
-  test("status: 404 when username is not exist", () => {
+  test("status: 400 when username is not exist", () => {
     const postObj = {
       username: "popsicle",
       body: "I like it.",
@@ -212,32 +212,91 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send(postObj)
-      .expect(404)
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("No user found under this username popsicle");
       });
   });
 
-  test("status: 404 when both username & article_id are not exist", () => {
+  test("status: 400 when comment_is is invalid- not a number", () => {
     const postObj = {
-      username: "Sadaf",
+      username: "icellusedkars",
       body: "I like it.",
+      comment_id: "ice_cream",
     };
     return request(app)
-      .post("/api/articles/88888/comments")
+      .post("/api/articles/1/comments")
       .send(postObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("ice_cream is invalid");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("status: 200 responds with updated article by article_id", () => {
+    const patchObj = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchObj)
+      .expect(200)
+      .then(({ body }) => {
+        console.log(body.article);
+        expect(body.article).toEqual({
+          article_id: 1,
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+
+  test("status: 400 when required information inc_votes is not provided", () => {
+    const patchObj = {};
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+
+  test("status: 400 when inc_votes not a number- invalid data", () => {
+    const patchObj = { inc_votes: "popsicle" };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+
+  test("status: 404 when article_id is valid but not exist", () => {
+    const patchObj = { inc_votes: 100 };
+    return request(app)
+      .patch("/api/articles/99999")
+      .send(patchObj)
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("No article found under article_id 88888");
-      })
-      .catch(() => {
-        return request(app)
-          .post("/api/articles/1/comments")
-          .send(postObj)
-          .expect(404)
-          .then(({ body }) => {
-            expect(body.msg).toBe("No user found under this username Sadaf");
-          });
+        expect(body.msg).toBe("Article not found under 99999 article_id");
+      });
+  });
+
+  test("Status: 400 bad request when article id is not valid", () => {
+    const patchObj = { inc_votes: 100 };
+    return request(app)
+      .patch("/api/articles/sadaf")
+      .send(patchObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request");
       });
   });
 });

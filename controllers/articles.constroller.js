@@ -4,6 +4,7 @@ const {
   fetchArticles,
   fetchCommentByArticleId,
   addCommentToChoosenArticle,
+  patchVotesOfArticle,
 } = require("../models/articles-models");
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -34,6 +35,11 @@ exports.getCommentByArticleId = (req, res, next) => {
 exports.postCommentToChoosenArticle = (req, res, next) => {
   const { username, body } = req.body;
   const { article_id } = req.params;
+  const { comment_id } = req.body;
+
+  if (comment_id !== undefined && !parseInt(comment_id)) {
+    res.status(400).send({ msg: `${comment_id} is invalid` });
+  }
 
   addCommentToChoosenArticle(article_id, username, body)
     .then((comment) => {
@@ -41,14 +47,13 @@ exports.postCommentToChoosenArticle = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === "23503") {
-        // console.log(err);
         if (err.detail.includes(article_id)) {
           res
             .status(404)
             .send({ msg: `No article found under article_id ${article_id}` });
         } else if (err.detail.includes(username)) {
           res
-            .status(404)
+            .status(400)
             .send({ msg: `No user found under this username ${username}` });
         } else {
           next(err);
@@ -57,4 +62,15 @@ exports.postCommentToChoosenArticle = (req, res, next) => {
         next(err);
       }
     });
+};
+
+exports.updatedArticleVotes = (req, res, next) => {
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+
+  patchVotesOfArticle(article_id, inc_votes)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch(next);
 };
