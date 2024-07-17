@@ -6,8 +6,11 @@ const {
   getArticleById,
   getAllArticles,
   getCommentByArticleId,
+  postCommentToChoosenArticle,
 } = require("./controllers/articles.constroller");
 const { getEndpoints } = require("./controllers/endpoints-controller");
+
+app.use(express.json());
 
 app.get("/api", getEndpoints);
 
@@ -19,8 +22,11 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentByArticleId);
 
+app.post("/api/articles/:article_id/comments", postCommentToChoosenArticle);
+
 app.use((err, req, res, next) => {
-  if (err.code === "22P02") {
+  //   console.log(err);
+  if (err.code === "22P02" || err.code === "23502") {
     res.status(400).send({ msg: "400 - Bad Request" });
   } else {
     next(err);
