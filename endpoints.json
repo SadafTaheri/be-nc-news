@@ -95,5 +95,10 @@
       "votes": 101,
       "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "seves an empty object when delete the given comment by comment_id responds status 204 which does not any content",
+    "queries": [],
+    "exampleResponse": {}
   }
 }

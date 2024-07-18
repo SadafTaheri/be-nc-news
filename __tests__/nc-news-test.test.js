@@ -242,7 +242,6 @@ describe("PATCH /api/articles/:article_id", () => {
       .send(patchObj)
       .expect(200)
       .then(({ body }) => {
-        console.log(body.article);
         expect(body.article).toEqual({
           article_id: 1,
           title: expect.any(String),
@@ -250,7 +249,7 @@ describe("PATCH /api/articles/:article_id", () => {
           author: expect.any(String),
           body: expect.any(String),
           created_at: expect.any(String),
-          votes: expect.any(Number),
+          votes: 101,
           article_img_url: expect.any(String),
         });
       });
@@ -269,6 +268,17 @@ describe("PATCH /api/articles/:article_id", () => {
 
   test("status: 400 when inc_votes not a number- invalid data", () => {
     const patchObj = { inc_votes: "popsicle" };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+
+  test("status: 400 when inc_votes key is incorrect key name", () => {
+    const patchObj = { votes: 1 };
     return request(app)
       .patch("/api/articles/1")
       .send(patchObj)
@@ -297,6 +307,35 @@ describe("PATCH /api/articles/:article_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("status: 204 return empty object when comment is deleted succesfully", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+
+  test("status: 404 when comment is valid but does not exist for deleting", () => {
+    return request(app)
+      .delete("/api/comments/99999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No Comment found under 99999");
+      });
+  });
+
+  test("status:400 when comment_id in invalid", () => {
+    return request(app)
+      .delete("/api/comments/not-number")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not-number is invalid");
       });
   });
 });
