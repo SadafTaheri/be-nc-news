@@ -335,7 +335,31 @@ describe("DELETE /api/comments/:comment_id", () => {
       .delete("/api/comments/not-number")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("not-number is invalid");
+        expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+});
+
+describe("GET /api/users", () => {
+  test("status: 200 responds with an array of all users", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.users).toHaveLength(4);
+        // this part I need to return an array when I console.log (body.users)=> recive an array of object but when I wanted to check the type of output it is an object
+        expect(typeof body.users).toBe("object");
+        body.users.forEach((user) => {
+          expect(user).toHaveProperty("username");
+          expect(user).toHaveProperty("name");
+          expect(user).toHaveProperty("avatar_url");
+
+          expect(user).toEqual({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          });
+        });
       });
   });
 });
