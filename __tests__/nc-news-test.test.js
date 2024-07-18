@@ -98,12 +98,42 @@ describe("GET /api/articles", () => {
         });
       });
   });
-  test("response with the articles ordered by created_at by defult", () => {
+
+  test("?sort_by= Status: 200 response with the articles ordered by created_at by defult", () => {
     return request(app)
-      .get("/api/articles")
+      .get("/api/articles?sort_by=created_at")
       .expect(200)
       .then(({ body }) => {
+        expect(body.articles.length).toBe(13);
         expect(body.articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+
+  test("?sort_by= status:200 responds with an array of articles sorted by any valid column & order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(13);
+        expect(body.articles).toBeSortedBy("title", { ascending: true });
+      });
+  });
+
+  test("?sort_by= status: 400 responds err mgs when provide invalid_column sorted_by", () => {
+    return request(app)
+      .get("/api/articles?sort_by=invalid_input_column")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid sort | order by query");
+      });
+  });
+
+  test("?order= status: 400 responds err mgs when provide invalid order", () => {
+    return request(app)
+      .get("/api/articles?order=invalid_order")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid sort | order by query");
       });
   });
 });
@@ -347,13 +377,7 @@ describe("GET /api/users", () => {
       .expect(200)
       .then(({ body }) => {
         expect(body.users).toHaveLength(4);
-        // this part I need to return an array when I console.log (body.users)=> recive an array of object but when I wanted to check the type of output it is an object
-        expect(typeof body.users).toBe("object");
         body.users.forEach((user) => {
-          expect(user).toHaveProperty("username");
-          expect(user).toHaveProperty("name");
-          expect(user).toHaveProperty("avatar_url");
-
           expect(user).toEqual({
             username: expect.any(String),
             name: expect.any(String),
