@@ -8,8 +8,9 @@ const {
   getCommentByArticleId,
   postCommentToChoosenArticle,
   updatedArticleVotes,
-} = require("./controllers/articles.constroller");
+} = require("./controllers/articles-constroller");
 const { getEndpoints } = require("./controllers/endpoints-controller");
+const { deleteCommentById } = require("./controllers/comment-controller");
 
 app.use(express.json());
 
@@ -26,6 +27,8 @@ app.get("/api/articles/:article_id/comments", getCommentByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentToChoosenArticle);
 
 app.patch("/api/articles/:article_id", updatedArticleVotes);
+
+app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.use((err, req, res, next) => {
   // console.log(err);
