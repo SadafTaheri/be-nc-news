@@ -136,6 +136,35 @@ describe("GET /api/articles", () => {
         expect(body.msg).toBe("Invalid sort | order by query");
       });
   });
+
+  test("?topic= status: 200 responds with an array of articles filtered by given topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("cats");
+        });
+      });
+  });
+
+  test("?topic= status: 400 responds err when topic is not valid", () => {
+    return request(app)
+      .get("/api/articles?topic=456")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+
+  test("?topic= status: 404 topic is valid but not exists", () => {
+    return request(app)
+      .get("/api/articles?topic=dogs")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {

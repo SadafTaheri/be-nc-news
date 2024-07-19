@@ -1,4 +1,6 @@
 const db = require("../db/connection");
+const { fetchTopics } = require("./topics-models");
+
 exports.selectArticleById = (article_id) => {
   return db
     .query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
@@ -13,8 +15,8 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
-exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
-  const greanList = [
+exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
+  const greenList = [
     "author",
     "title",
     "article_id",
@@ -26,17 +28,35 @@ exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
   ];
   const validQuery = ["asc", "desc"];
 
-  if (!greanList.includes(sort_by) || !validQuery.includes(order)) {
+  if (!greenList.includes(sort_by) || !validQuery.includes(order)) {
     return Promise.reject({
       status: 400,
       msg: "Invalid sort | order by query",
     });
   }
 
-  let queryStr = `SELECT articles.author, articles.title,articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+  return fetchTopics().then((topics) => {
+    const allExistsTopics = topics.map((topic) => topic.slug);
+    if (topic && !allExistsTopics.includes(topic)) {
+      return Promise.reject({
+        status: 404,
+        msg: "Not Found",
+      });
+    }
 
-  return db.query(queryStr).then((result) => {
-    return result.rows;
+    let queryStr = `SELECT articles.author, articles.title,articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id `;
+
+    const queryTopic = [];
+    if (topic) {
+      queryStr += `WHERE articles.topic = $1 `;
+      queryTopic.push(topic);
+    }
+
+    queryStr += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`;
+
+    return db.query(queryStr, queryTopic).then((result) => {
+      return result.rows;
+    });
   });
 };
 
