@@ -53,6 +53,7 @@ describe("GET /api/articles/:article_id", () => {
           votes: 100,
           article_img_url:
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          comment_count: "11",
         });
       });
   });
@@ -142,8 +143,33 @@ describe("GET /api/articles", () => {
       .get("/api/articles?topic=cats")
       .expect(200)
       .then(({ body }) => {
+        expect(body.articles.length).toBe(1);
         body.articles.forEach((article) => {
           expect(article.topic).toBe("cats");
+        });
+      });
+  });
+
+  test("?topic= status: 200 responds with an array of articles filtered by given topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(12);
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+
+  test("?topic= status: 200 responds with an array of articles filtered by given topic", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(0);
+        body.articles.forEach((article) => {
+          expect(article.topic).toBe("paper");
         });
       });
   });
