@@ -442,3 +442,37 @@ describe("GET /api/users", () => {
       });
   });
 });
+
+describe("GET /api/users/:username", () => {
+  test("status: 200 return a user by given username", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        //console.log(body.user);
+        expect(body.user).toEqual({
+          username: expect.any(String),
+          name: expect.any(String),
+          avatar_url: expect.any(String),
+        });
+      });
+  });
+
+  test("Status: 404 when username is not valid", () => {
+    return request(app)
+      .get("/api/users/12345")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found user under 12345");
+      });
+  });
+
+  test("Status: 404 when passed a valid username but username does not exist", () => {
+    return request(app)
+      .get("/api/users/non-exist-user")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found user under non-exist-user");
+      });
+  });
+});
