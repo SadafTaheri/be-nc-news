@@ -11,7 +11,10 @@ const {
 } = require("./controllers/articles-constroller");
 const { getEndpoints } = require("./controllers/endpoints-controller");
 const { deleteCommentById } = require("./controllers/comment-controller");
-const { getAllUsers } = require("./controllers/users_controller");
+const {
+  getAllUsers,
+  getUserByUserName,
+} = require("./controllers/users_controller");
 
 app.use(express.json());
 
@@ -32,6 +35,8 @@ app.patch("/api/articles/:article_id", updatedArticleVotes);
 app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.get("/api/users", getAllUsers);
+
+app.get("/api/users/:username", getUserByUserName);
 
 app.use((err, req, res, next) => {
   // console.log(err);
