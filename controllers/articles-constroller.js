@@ -5,6 +5,8 @@ const {
   fetchCommentByArticleId,
   addCommentToChoosenArticle,
   patchVotesOfArticle,
+  insertArticle,
+  getCommentCountByArticle,
 } = require("../models/articles-models");
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -74,6 +76,32 @@ exports.updatedArticleVotes = (req, res, next) => {
   patchVotesOfArticle(article_id, inc_votes)
     .then((article) => {
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.addArticle = (req, res, next) => {
+  const {
+    author,
+    title,
+    body,
+    topic,
+    article_img_url = "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+  } = req.body;
+
+  if (!author || !title || !body || !topic) {
+    return res
+      .status(400)
+      .send({ msg: "400 - Bad Request: missing required fields" });
+  }
+
+  insertArticle(author, title, body, topic, article_img_url)
+    .then((newArticle) => {
+      return getCommentCountByArticle(newArticle.article_id).then(
+        (commentCount) => {
+          res.status(201).send({ ...newArticle, comment_count: commentCount });
+        }
+      );
     })
     .catch(next);
 };

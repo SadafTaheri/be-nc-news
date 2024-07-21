@@ -476,3 +476,140 @@ describe("GET /api/users/:username", () => {
       });
   });
 });
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("status:200 update the votes for a comment", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toEqual({
+          comment_id: expect.any(Number),
+          body: expect.any(String),
+          article_id: expect.any(Number),
+          author: expect.any(String),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+        });
+      });
+  });
+
+  test("status: 400 bad request when comment_id is valid but inc_votes is not a number", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: "not_number" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          "400 - Bad Request : comment_id must be a number"
+        );
+      });
+  });
+
+  test("status: 400 bad request when comment_id is invalid", () => {
+    return request(app)
+      .patch("/api/comments/invalid_id")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request");
+      });
+  });
+
+  test("status: 404 when comment_id is valid but not-exist", () => {
+    return request(app)
+      .patch("/api/comments/99999")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("comment not found under 99999 comment_id");
+      });
+  });
+});
+
+describe("POST /api/articles", () => {
+  test("status: 201 should create a new article and responds with new article added by user check all property available", () => {
+    const newArticleObj = {
+      author: "icellusedkars",
+      title: "New Article Title",
+      body: "This is a new body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticleObj)
+      .expect(201)
+      .then(({ body }) => {
+        // console.log(body);
+        expect(body).toHaveProperty("article_id");
+        expect(body.author).toBe(newArticleObj.author);
+        expect(body.title).toBe(newArticleObj.title);
+        expect(body.body).toBe(newArticleObj.body);
+        expect(body.topic).toBe(newArticleObj.topic);
+        expect(body.article_img_url).toBe(
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        );
+        expect(body).toHaveProperty("votes");
+        expect(body).toHaveProperty("created_at");
+        expect(body).toHaveProperty("comment_count");
+      });
+  });
+
+  test("status: 201 should create a new article and responds with new article added by user if url provided by user", () => {
+    const newArticleObj = {
+      author: "icellusedkars",
+      title: "New Article Title",
+      body: "This is a new body",
+      topic: "mitch",
+      article_img_url: "123",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticleObj)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body).toEqual({
+          article_id: expect.any(Number),
+          title: "New Article Title",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "This is a new body",
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: "123",
+          comment_count: 0,
+        });
+      });
+  });
+
+  test("status: 400 return a bad request when required fiels are missing", () => {
+    const newArticleObj = {
+      author: "icellusedkars",
+      title: "New Article Title",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticleObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request: missing required fields");
+      });
+  });
+
+  test("status: 400 return a bad request when author is not provided", () => {
+    const newArticleObj = {
+      title: "New Article Title",
+      body: "This is a new body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticleObj)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("400 - Bad Request: missing required fields");
+      });
+  });
+});
