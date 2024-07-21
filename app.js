@@ -8,9 +8,13 @@ const {
   getCommentByArticleId,
   postCommentToChoosenArticle,
   updatedArticleVotes,
+  addArticle,
 } = require("./controllers/articles-constroller");
 const { getEndpoints } = require("./controllers/endpoints-controller");
-const { deleteCommentById } = require("./controllers/comment-controller");
+const {
+  deleteCommentById,
+  updatedCommentVotes,
+} = require("./controllers/comment-controller");
 const {
   getAllUsers,
   getUserByUserName,
@@ -37,6 +41,10 @@ app.delete("/api/comments/:comment_id", deleteCommentById);
 app.get("/api/users", getAllUsers);
 
 app.get("/api/users/:username", getUserByUserName);
+
+app.patch("/api/comments/:comment_id", updatedCommentVotes);
+
+app.post("/api/articles", addArticle);
 
 app.use((err, req, res, next) => {
   // console.log(err);

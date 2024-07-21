@@ -107,3 +107,25 @@ exports.patchVotesOfArticle = (article_id, inc_votes) => {
       return rows[0];
     });
 };
+
+exports.insertArticle = (author, title, body, topic, article_img_url) => {
+  return db
+    .query(
+      `INSERT INTO articles (author, title, body, topic, article_img_url ) VALUES ($1,$2,$3,$4,$5) RETURNING *;`,
+      [author, title, body, topic, article_img_url]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
+
+exports.getCommentCountByArticle = (article_id) => {
+  return db
+    .query(
+      `SELECT COUNT(*) AS comment_count FROM comments WHERE article_id =$1`,
+      [article_id]
+    )
+    .then(({ rows }) => {
+      return parseInt(rows[0].comment_count, 10);
+    });
+};
