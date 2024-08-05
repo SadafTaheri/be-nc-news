@@ -19,6 +19,9 @@ const {
   getAllUsers,
   getUserByUserName,
 } = require("./controllers/users_controller");
+const cors = require("cors");
+
+app.use(cors());
 
 app.use(express.json());
 
